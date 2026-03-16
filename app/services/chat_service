@@ -1,0 +1,10 @@
+from app.services.welcome_service import wrong_choice_message,linear_message
+
+def choice(choice:str):
+    try:
+        number = int(choice)
+        match number:
+            case 1:
+                return linear_message()
+    except:
+        return wrong_choice_message()
