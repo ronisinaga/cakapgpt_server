@@ -14,7 +14,11 @@ from app.controllers.chat_controller import welcome
 app = FastAPI(title="Web API OKAPP")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173'"],
+    allow_origins=[
+        "http://localhost:5173'",
+        "https://cakapgpt.com",
+        "https://www.cakapgpt.com",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
