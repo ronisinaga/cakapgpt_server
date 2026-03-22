@@ -139,8 +139,11 @@ def stream_groq(messages):
                 stream=True
             )
             break  # berhasil, keluar dari loop
-        except client.RateLimitError:
-            continue  # coba model berikutnya
+        except Exception as e:
+            if "rate_limit_exceeded" in str(e) or "429" in str(e):
+                continue
+            else:
+                raise e
 
     #arr_chunk = []
     for chunk in stream:
