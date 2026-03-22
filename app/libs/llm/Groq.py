@@ -100,7 +100,7 @@ MODELS = [
     "llama-3.1-8b-instant",     # fallback terakhir
 ]
 
-client = Groq(api_key=GROQ_API_KEY_2)
+client = Groq(api_key=GROQ_API_KEY)
 
 def groq_complete(messages):
     """
