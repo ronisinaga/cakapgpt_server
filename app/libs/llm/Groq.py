@@ -92,6 +92,13 @@ A blank line must always separate the label from the table.
 """
 
 MODEL_NAME = "llama-3.3-70b-versatile"
+MODELS = [
+    "llama-3.3-70b-versatile",  # utama
+    "llama-3.1-70b-versatile",  # fallback 1
+    "mixtral-8x7b-32768",       # fallback 2
+    "gemma2-9b-it",             # fallback 3
+    "llama-3.1-8b-instant",     # fallback terakhir
+]
 
 client = Groq(api_key=GROQ_API_KEY_2)
 
@@ -124,11 +131,16 @@ def stream_groq(messages):
         {"role": msgs[0].role, "content": msgs[0].content}
     ]
 
-    stream = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=body,
-        stream=True
-    )
+    for model in MODELS:
+        try:
+            stream = client.chat.completions.create(
+                model=model,
+                messages=body,
+                stream=True
+            )
+            break  # berhasil, keluar dari loop
+        except client.RateLimitError:
+            continue  # coba model berikutnya
 
     #arr_chunk = []
     for chunk in stream:
