@@ -141,7 +141,7 @@ def stream_groq(messages):
             )
             break  # berhasil, keluar dari loop
         except Exception as e:
-            if "rate_limit_exceeded" in str(e) or "429" in str(e) or "model_decomissioned" in str(e):
+            if "rate_limit_exceeded" in str(e) or "429" in str(e) or "model_decommissioned" in str(e):
                 continue
             else:
                 raise e
