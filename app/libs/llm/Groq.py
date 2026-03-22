@@ -94,10 +94,10 @@ A blank line must always separate the label from the table.
 MODEL_NAME = "llama-3.3-70b-versatile"
 MODELS = [
     "llama-3.3-70b-versatile",  # utama
-    "qwen/qwen3-32b",  # fallback 1
     "mixtral-8x7b-32768",       # fallback 2
     "gemma2-9b-it",             # fallback 3
     "llama-3.1-8b-instant",     # fallback terakhir
+    "qwen/qwen3-32b",  # fallback 1
     "meta-llama/llama-4-scout-17b-16e-instruct",
 ]
 
