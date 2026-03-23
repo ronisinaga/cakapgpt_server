@@ -1,9 +1,7 @@
-from openai import OpenAI
-from app.config import OPENAI_API_KEY
+import google.generativeai as genai
+from app.config import GEMINI_API_KEY
 
-print(OPENAI_API_KEY)
-
-client = OpenAI(api_key=OPENAI_API_KEY)
+genai.configure(api_key=GEMINI_API_KEY)
 
 SYSTEM_PROMPT = """
   You are an AI assistant named CakapGPT, created by Roni Fitriandi Sinaga.
@@ -89,13 +87,49 @@ A blank line must always separate the label from the table.
 - Write LaTeX formulas OUTSIDE the table, before or after it.
 """
 
-def generate_chat(messages):
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            *messages
-        ],
-        temperature=0.7
+model = genai.GenerativeModel(
+    model_name="models/gemini-2.5-flash",
+    system_instruction=SYSTEM_PROMPT
+)
+
+MODELS = [
+    "gemini-2.5-pro",  # utama
+    "gemini-2.5-flash-lite",             # fallback 1
+    "gemini-2.5-flash",     # fallback 2
+]
+
+def convert_messages(messages):
+    history = []
+    for msg in messages:
+        if msg.role == "user":
+            history.append({
+                "role": "user",
+                "parts": [msg.content]
+            })
+        elif msg.role == "assistant":
+            history.append({
+                "role": "model",
+                "parts": [msg.content]
+            })
+    return history
+
+
+def stream_chat(messages):
+    arr_chunk = []
+    history = convert_messages(messages)
+
+    chat = model.start_chat(history=history)
+
+    response = chat.send_message(
+        messages[-1].content,
+        stream=True
     )
-    return response.choices[0].message.content
+
+    for chunk in response:
+        #if chunk.text:
+        if hasattr(chunk, "text") and chunk.text:
+            #print(chunk.text)
+            #yield chunk.text
+            arr_chunk.append(chunk.text)
+    
+    return arr_chunk

@@ -5,7 +5,7 @@ from sse_starlette import EventSourceResponse
 
 from app.controllers.llm_controller import chatGPT,startChat
 from app.helpers.StreamWriterHelper import StreamWordWriter,StreamTextWriter
-from app.libs.llm.Gemini import stream_chat
+from app.libs.llm.Gemini import stream_gemini
 from app.schemas.llm_schema import ChatRequest, ChatResponse
 
 llm_router = APIRouter()
@@ -18,7 +18,7 @@ def chat(req:ChatRequest):
 @llm_router.post("/chat/gemini", response_model=ChatResponse)
 def chat(req:ChatRequest):
     def event_generator():
-        for token in stream_chat(req.messages):
+        for token in stream_gemini(req.messages):
             yield token
 
     return StreamingResponse(
@@ -27,19 +27,33 @@ def chat(req:ChatRequest):
     )
 
 @llm_router.get("/chat/stream")
-def chat(prompt:str):
+def chat(prompt:str, history: str = "[]"):
+    # Parse history dari JSON string
+    try:
+        history_list = json.loads(history)
+    except:
+        history_list = []
+    # Gabungkan history + pesan baru
+    messages = []
+    for h in history_list:
+        messages.append({
+            "role": h.get("role", "user"),
+            "content": h.get("content", "")
+        })
+    # Tambahkan pesan terbaru
+    messages.append({
+        "role": "user",
+        "content": prompt
+    })
     json_string = json.dumps({
-        "messages": [
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ]
+        "messages": messages
     }, ensure_ascii=False)
+
     chat = startChat(json_string)
     if isinstance(chat,str):
         chat = [chat]
-    return EventSourceResponse(startChat(json_string),
+    return EventSourceResponse(
+        startChat(json_string),
         headers={
             "Access-Control-Allow-Origin": "http://localhost:5173",
             "Cache-Control": "no-cache",
