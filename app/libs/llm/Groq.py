@@ -6,6 +6,7 @@ from groq import Groq
 from app.config import GROQ_API_KEY_2
 from app.libs.llm.Gemini import stream_gemini, complete_gemini
 from typing import Generator
+import logging
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
@@ -185,7 +186,7 @@ def stream_groq_only(messages) -> Generator[str, None, None]:
 
         except Exception as e:
             error_msg = str(e)
-            print(f"Groq {model} error: {error_msg}")
+            logging.info(f"Groq {model} error: {error_msg}")
             if any(x in error_msg for x in ["rate_limit_exceeded", "429", "model_decommissioned"]):
                 continue
             else:
@@ -234,21 +235,21 @@ def stream_groq(messages) -> Generator[str, None, None]:
     Main stream function.
     Urutan: Gemini → Groq → error message
     """
-    # ✅ Coba Gemini dulu
+    #Coba Gemini dulu
     try:
         yield from stream_gemini(messages, SYSTEM_PROMPT)
         return
     except Exception as e:
-        print(f"All Gemini failed: {e}, falling back to Groq...")
+        logging.info(f"All Gemini failed: {e}, falling back to Groq...")
 
-    # ✅ Fallback ke Groq
+    #Fallback ke Groq
     try:
         yield from stream_groq_only(messages)
         return
     except Exception as e:
-        print(f"All Groq failed: {e}")
+        logging.info(f"All Groq failed: {e}")
 
-    # ✅ Semua gagal
+    #Semua gagal
     yield "Maaf, layanan AI sedang tidak tersedia. Silakan coba beberapa saat lagi."
     yield "\n"
     yield "[DONE]"

@@ -10,6 +10,7 @@ from app.routers.experiment_router import experiment_router
 from app.helpers.StreamWriterHelper import StreamCharWriter
 from fastapi.middleware.cors import CORSMiddleware
 from app.controllers.chat_controller import welcome
+import logging
 
 app = FastAPI(title="Web API OKAPP")
 app.add_middleware(
@@ -70,3 +71,9 @@ async def stream(request: Request):
 async def welcome_process():
     message = welcome()
     return EventSourceResponse(StreamCharWriter(message.processed))
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)

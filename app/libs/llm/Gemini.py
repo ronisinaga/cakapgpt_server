@@ -4,6 +4,7 @@ import time
 from typing import Generator
 from google import genai
 from google.genai import types
+import logging
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=GEMINI_API_KEY)
@@ -81,15 +82,15 @@ def stream_gemini(messages, system_prompt: str) -> Generator[str, None, None]:
 
         except Exception as e:
             error_msg = str(e)
-            print(f"Gemini {model} error: {error_msg}")
+            logging.info(f"Gemini {model} error: {error_msg}")
             if is_rate_limit_error(error_msg):
-                print(f"Rate limit detected, trying next model...")
+                logging.info(f"Rate limit detected, trying next model...")
                 continue
             else:
-                print(f"Non-rate-limit error, raising...")
+                logging.info(f"Non-rate-limit error, raising...")
                 raise e
 
-    print("All Gemini models exhausted, raising to trigger Groq fallback...")
+    logging.info("All Gemini models exhausted, raising to trigger Groq fallback...")
     raise Exception("All Gemini models rate limited or unavailable")
 
 
