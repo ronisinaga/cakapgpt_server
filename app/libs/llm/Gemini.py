@@ -74,7 +74,7 @@ def stream_gemini(messages, system_prompt: str) -> Generator[str, None, None]:
             for chunk in response:
                 if chunk.text:
                     yield chunk.text
-                    time.sleep(0.5)
+                    time.sleep(0.05)
 
             yield "\n"
             yield "[DONE]"
