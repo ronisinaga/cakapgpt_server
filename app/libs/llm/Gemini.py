@@ -21,6 +21,10 @@ RATE_LIMIT_ERRORS = [
     "rate_limit",
     "RESOURCE_EXHAUSTED",
     "too many requests",
+    "exceeded your current quota",  
+    "GenerateRequestsPerDay",        
+    "free_tier",                     
+    "retry",                         
 ]
 
 def is_rate_limit_error(error_msg: str) -> bool:
@@ -79,10 +83,13 @@ def stream_gemini(messages, system_prompt: str) -> Generator[str, None, None]:
             error_msg = str(e)
             print(f"Gemini {model} error: {error_msg}")
             if is_rate_limit_error(error_msg):
+                print(f"Rate limit detected, trying next model...")
                 continue
             else:
+                print(f"Non-rate-limit error, raising...")
                 raise e
 
+    print("All Gemini models exhausted, raising to trigger Groq fallback...")
     raise Exception("All Gemini models rate limited or unavailable")
 
 
