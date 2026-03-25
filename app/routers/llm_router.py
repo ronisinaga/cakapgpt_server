@@ -6,7 +6,7 @@ from sse_starlette import EventSourceResponse
 from app.controllers.llm_controller import chatGPT,startChat
 from app.helpers.StreamWriterHelper import StreamWordWriter,StreamTextWriter
 from app.libs.llm.Gemini import stream_gemini
-from app.schemas.llm_schema import ChatRequest, ChatResponse
+from app.schemas.llm_schema import ChatRequest, ChatResponse,ChatStreamRequest
 
 llm_router = APIRouter()
 
@@ -41,6 +41,7 @@ def chat(prompt:str, history: str = "[]"):
             "content": h.get("content", "")
         })
     # Tambahkan pesan terbaru
+    #print(history)
     messages.append({
         "role": "user",
         "content": prompt
@@ -55,11 +56,35 @@ def chat(prompt:str, history: str = "[]"):
     return EventSourceResponse(
         startChat(json_string),
         headers={
-            "Access-Control-Allow-Origin": "http://localhost:5173",
+            "Access-Control-Allow-Origin": "http://localhost:5173,https://cakapgpt.com",
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
             "X-Accel-Buffering": "no"
         })
+
+@llm_router.post("/chat/stream")
+def chat_post(req: ChatStreamRequest):
+    messages = []
+    for h in req.history:
+        if h.role == "user":
+            messages.append({"role": h.role, "content": h.content})
+    messages.append({"role": "user", "content": req.prompt})
+
+    json_string = json.dumps({"messages": messages}, ensure_ascii=False)
+    #print(req.history)
+    chat = startChat(json_string)
+    if isinstance(chat, str):
+        chat = [chat]
+    return EventSourceResponse(
+        startChat(json_string),
+        headers={
+            "Access-Control-Allow-Origin": "http://localhost:5173,https://cakapgpt.com",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
+
 
 @llm_router.get("/chat/start")
 async def start():

@@ -16,7 +16,7 @@ app = FastAPI(title="Web API OKAPP")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173'",
+        "http://localhost:5173",
         "https://cakapgpt.com",
         "https://www.cakapgpt.com",
     ],
