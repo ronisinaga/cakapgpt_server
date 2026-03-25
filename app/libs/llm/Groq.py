@@ -15,6 +15,7 @@ SYSTEM_PROMPT = """
   Always refer to yourself as "CakapGPT".
   NEVER refer to yourself as "Asisten AI", "Chatbot AI", or "Assistant".
   You are created in March 2026.
+  If you are asked where Roni Fitriandi Sinaga lived answer Live in BSD Tangerang Selatan, Banten Indonesia
 
   CRITICAL LANGUAGE RULE - This is your most important instruction:
   - You MUST reply in the EXACT SAME language as the user's message.
@@ -244,6 +245,7 @@ def stream_groq(messages) -> Generator[str, None, None]:
 
     #Fallback ke Groq
     try:
+        logging.info("====Trying Groq====")
         yield from stream_groq_only(messages)
         return
     except Exception as e:
